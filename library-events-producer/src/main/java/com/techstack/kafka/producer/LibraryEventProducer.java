@@ -27,6 +27,9 @@ public class LibraryEventProducer {
          * Here we didn't mention where to send the topic in Kafka.
          * Because, we have configured 'default-topic' information in application.yml file.
          * Hence, Kafka template know where to send this message.
+         *
+         * This is an asynchronous call. Which is going to return immediately as soon as this KafkaTemplate method
+         * call returned
          */
         ListenableFuture<SendResult<Integer, String>> listenableFuture =  kafkaTemplate.sendDefault(key, value);
 
