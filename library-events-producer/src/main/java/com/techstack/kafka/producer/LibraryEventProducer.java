@@ -11,6 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -58,6 +62,33 @@ public class LibraryEventProducer {
             }
         });
 
+    }
+
+    public SendResult<Integer, String> sendLibraryEventSynchronous(final LibraryEvent libraryEvent)
+            throws JsonProcessingException, ExecutionException, InterruptedException, TimeoutException {
+        Integer key = libraryEvent.getLibraryEventId();
+        String value = objectMapper.writeValueAsString(libraryEvent);
+
+        /**
+         * When you use get(), you are going to wait until the future returned successfully.
+         * Basically it's going to wait until the future is resolved to on success or on failure
+         */
+        SendResult<Integer, String> sendResult;
+        try {
+            //Without Timeout
+            //sendResult = kafkaTemplate.sendDefault(key, value).get();
+
+            //With TimeOut: It would wait max 1 seconds to get the response from the Kafka, else timeout
+            sendResult = kafkaTemplate.sendDefault(key, value).get(1, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("InterruptedException/ExecutionException sending the message and the exception is {}", e.getMessage());
+            throw  e;
+        } catch (Exception e) {
+            log.error("Exception sending the message and the exception is {}", e.getMessage());
+            throw e;
+        }
+
+        return sendResult;
     }
 
     private void handleFailure(Integer key, String value, Throwable ex) {
