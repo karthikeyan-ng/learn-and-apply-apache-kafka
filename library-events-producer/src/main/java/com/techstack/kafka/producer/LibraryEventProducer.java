@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techstack.kafka.domain.LibraryEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeoutException;
 @Component
 @RequiredArgsConstructor
 public class LibraryEventProducer {
+
+    private static final String TOPIC_NAME = "library-events";
 
     private final KafkaTemplate<Integer, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -62,6 +65,51 @@ public class LibraryEventProducer {
             }
         });
 
+    }
+
+    public void sendLibraryEvent_Approach2(final LibraryEvent libraryEvent) throws JsonProcessingException {
+        Integer key = libraryEvent.getLibraryEventId();
+        String value = objectMapper.writeValueAsString(libraryEvent);
+
+        /**
+         * This is an asynchronous call. Which is going to return immediately as soon as this KafkaTemplate method
+         * call returned
+         *
+         * By using KafkaTemplate send() using another overloaded method which is accepting {@link ProducerRecord}.
+         * So, it will take information from the ProducerRecord.
+         */
+        ProducerRecord<Integer, String> producerRecord = buildProducerRecord(key, value, TOPIC_NAME);
+        ListenableFuture<SendResult<Integer, String>> listenableFuture =  kafkaTemplate.send(producerRecord);
+
+        /**
+         * ListenableFuture has a option of add  call back
+         */
+        listenableFuture.addCallback(new ListenableFutureCallback<SendResult<Integer, String>>() {
+
+            /**
+             * This method get invoked if the message that published is ended up with failure
+             * @param throwable
+             */
+            @Override
+            public void onFailure(Throwable throwable) {
+                handleFailure(key, value, throwable);
+            }
+
+            /**
+             * This method gets invoked if the publish is successful
+             *
+             * @param result
+             */
+            @Override
+            public void onSuccess(SendResult<Integer, String> result) {
+                handleSuccess(key, value, result);
+            }
+        });
+
+    }
+
+    private ProducerRecord<Integer, String> buildProducerRecord(Integer key, String value, String topic) {
+        return new ProducerRecord<>(topic, null, key, value, null);
     }
 
     public SendResult<Integer, String> sendLibraryEventSynchronous(final LibraryEvent libraryEvent)
