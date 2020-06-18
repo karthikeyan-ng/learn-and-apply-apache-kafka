@@ -1,4 +1,4 @@
-package com.techstack.kafka.unit;
+package com.techstack.kafka.unit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techstack.kafka.controller.LibraryEventsController;
@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,7 +50,7 @@ public class LibraryEventControllerUnitTest {
         String json = objectMapper.writeValueAsString(libraryEvent);
 
         //When
-        doNothing().when(libraryEventProducer).sendLibraryEvent_Approach2(isA(LibraryEvent.class));
+        when(libraryEventProducer.sendLibraryEvent_Approach2(isA(LibraryEvent.class))).thenReturn(null);
 
         //Then
         mockMvc.perform(post("/v1/library-event")
@@ -73,7 +73,7 @@ public class LibraryEventControllerUnitTest {
         String json = objectMapper.writeValueAsString(libraryEvent);
 
         //When
-        doNothing().when(libraryEventProducer).sendLibraryEvent_Approach2(isA(LibraryEvent.class));
+        when(libraryEventProducer.sendLibraryEvent_Approach2(isA(LibraryEvent.class))).thenReturn(null);
 
         //Then
         String expectedErrorMessage = "book.bookAuthor - must not be blank, book.bookId - must not be null";
