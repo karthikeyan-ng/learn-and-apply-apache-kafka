@@ -116,7 +116,7 @@ public class LibraryEventControllerIntegrationTest {
         //given
         Book book = Book.builder()
                 .bookId(456)
-                .bookAuthor("Dilip")
+                .bookAuthor("Karthi")
                 .bookName("Kafka using Spring Boot")
                 .build();
 
