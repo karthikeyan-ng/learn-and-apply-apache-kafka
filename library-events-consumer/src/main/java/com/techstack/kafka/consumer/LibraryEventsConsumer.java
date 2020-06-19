@@ -14,6 +14,9 @@ public class LibraryEventsConsumer {
      * 1. Kafka container have 1..N number of messages.
      * 2. However when we use @KafkaListener will poll messages one by one. Hence we are
      * processing single ConsumerRecord (message)
+     * 3. @KafkaListener annotation uses the  ConcurrentMessageListener
+     * 4. With ConcurrentMessageListener we can spin up multiple instances of the same Kafka message
+     * 5. If your application running on Cloud / Kubernaties environment, this option (ConcurrentMessageListener) is not necessary
      */
     @KafkaListener(topics = {"library-events"})
     public void onMessage(ConsumerRecord<Integer,String> consumerRecord) {
