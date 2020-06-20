@@ -28,6 +28,10 @@ public class LibraryEventsService {
         LibraryEvent libraryEvent = objectMapper.readValue(consumerRecord.value(), LibraryEvent.class);
         log.info("libraryEvent : {} ", libraryEvent);
 
+        /**
+         * Inorder to simulate a retry logic, we have configured this IF condition.
+         * It would throw RecoverableDataAccessException
+         */
         if(libraryEvent.getLibraryEventId() != null && libraryEvent.getLibraryEventId() == 000){
             throw new RecoverableDataAccessException("Temporary Network Issue");
         }
