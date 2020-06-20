@@ -1,6 +1,9 @@
 package com.techstack.kafka.config;
 
+import com.techstack.kafka.service.LibraryEventsService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.boot.autoconfigure.kafka.ConcurrentKafkaListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +22,10 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @EnableKafka
+@RequiredArgsConstructor
 public class LibraryEventsConsumerConfig {
+
+    private final LibraryEventsService libraryEventsService;
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory(
@@ -55,6 +61,34 @@ public class LibraryEventsConsumerConfig {
          * Retry Mechanism
          */
         factory.setRetryTemplate(retryTemplate());
+
+        /**
+         * Recovery Logic: Type - 1
+         */
+        factory.setRecoveryCallback((context -> {
+            /**
+             * Here the cause of the exception is related to Data Access Exception
+             */
+            if(context.getLastThrowable().getCause() instanceof RecoverableDataAccessException){
+                //invoke recovery logic
+                log.info("Inside the recoverable logic");
+
+                //context contains lot of attributes. To print all the attributes
+                /*Arrays.asList(context.attributeNames())
+                        .forEach(attributeName -> {
+                            log.info("Attribute name is : {} ", attributeName);
+                            log.info("Attribute Value is : {} ", context.getAttribute(attributeName));
+                        });*/
+
+                ConsumerRecord<Integer, String> consumerRecord = (ConsumerRecord<Integer, String>) context.getAttribute("record");
+                libraryEventsService.handleRecovery(consumerRecord);
+            } else{
+                log.info("Inside the non recoverable logic");
+                throw new RuntimeException(context.getLastThrowable().getMessage());
+            }
+
+            return null;
+        }));
 
         return  factory;
     }
