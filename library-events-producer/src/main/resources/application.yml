@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: nonprod
 ---
 spring:
   profiles: local
@@ -12,19 +12,34 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
       properties:
-        acks: 1
+        acks: all
         retries: 10
+        retry.backoff.ms: 1000
     admin:
       properties:
         bootstrap.servers: localhost:9092, localhost:9093, localhost:9094
 ---
 spring:
-  profiles: dev
+  profiles: nonprod
   kafka:
+    template:
+      default-topic: library-events
     producer:
-      bootstrap-servers: dev:9092, dev:9093, dev:9094
+      bootstrap-servers: localhost:9095,localhost:9096,localhost:9097
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      ssl:
+        trust-store-location: file:/Users/rabodevops17/Documents/Workspace/IntelliJWorkspace/PersonalWorkspace/learn-and-apply-apache-kafka/ssl/client.truststore.jks
+        trust-store-password: welcome
+        key-store-location: file:/Users/rabodevops17/Documents/Workspace/IntelliJWorkspace/PersonalWorkspace/learn-and-apply-apache-kafka/ssl/client.keystore.jks
+        key-store-password: welcome
+      properties:
+        acks: all
+        retries: 10
+        retry.backoff.ms: 1000
+        security:
+          protocol: SSL
+        ssl.endpoint.identification.algorithm:
 ---
 spring:
   profiles: prod

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local
+    active: nonprod
 server:
   port: 8081
 
@@ -43,6 +43,30 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: library-events-listener-group
+      ssl:
+        trust-store-location: file:/Users/rabodevops17/Documents/Workspace/IntelliJWorkspace/PersonalWorkspace/learn-and-apply-apache-kafka/ssl/client.truststore.jks
+        trust-store-password: welcome
+        key-store-location: file:/Users/rabodevops17/Documents/Workspace/IntelliJWorkspace/PersonalWorkspace/learn-and-apply-apache-kafka/ssl/client.keystore.jks
+        key-store-password: welcome
+    producer:
+      bootstrap-servers:
+        -   localhost:9095,localhost:9096,localhost:9097
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security:
+        protocol: SSL
+      ssl.endpoint.identification.algorithm:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+  h2:
+    console:
+      enabled: true
 
 ---
 
