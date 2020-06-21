@@ -32,6 +32,9 @@ auto.create.topics.enable=false
 ./kafka-topics.sh --create --topic test-topic -zookeeper localhost:2181 --replication-factor 1 --partitions 4
 ```
 
+Here, `test-topic` is a topic name. Here `--replication-factor 1` refers to how many ZooKeeper replicates for this topic.
+Here `--partitions 4` refers to how many partitions you would like to create for this topic.
+
 ## How to instantiate a Console Producer?
 
 ### Without Key
@@ -108,6 +111,10 @@ kafka-console-producer.bat --broker-list localhost:9092 --topic test-topic
 kafka-console-producer.bat --broker-list localhost:9092 --topic test-topic --property "key.separator=-" --property "parse.key=true"
 ```
 
+**TIP**
+- Here the parameter `--property "key.separator=-"` is to identify the message key character. In this case it's `-` (Hyphen).
+- Here the parameter `--property "parse.key=true"` is to parse the key and send it to the corresponding partition.
+
 ## How to instantiate a Console Consumer?
 
 ### Without Key
@@ -121,6 +128,15 @@ kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic 
 ```
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic --from-beginning -property "key.separator= - " --property "print.key=true"
 ```
+
+**TIP:** 
+- Here `--from-beginning` is a parameter where it will request consumer to consume messages from the beginning of 
+the given topic `test-topic`.
+- If you don't specify `--from-beginning` your new messages will be displayed in any order. Because, those messages are
+stored in different partitions.
+- Message ordering is guaranteed at the partition level
+- If you want to consume messages which is stored in the specific key partition, use `-property "key.separator= - "`
+- When you print message with key then use this property `--property "print.key=true"`
 
 ### With Consumer Group
 
@@ -284,3 +300,6 @@ kafka-run-class.bat kafka.tools.DumpLogSegments --deep-iteration --files /tmp/ka
 ```
 </p>
 </details>
+
+# IDE Plugins
+Install `"Spring Assistant"` plugin in IntelliJ IDE
